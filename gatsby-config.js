@@ -6,7 +6,14 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitleAlt: `Minimal Blog - Gatsby Theme`,
+    siteTitle: `#define BUILD_FAILED_SUCCESSFULLY`,
+    siteTitleAlt: `Build Failed Successfully`,
+    siteHeadline: `Minimal Blog - Gatsby Theme from @lekoarts`,
+    siteUrl: `http://build-failed-successfully.fail`,
+    siteDescription: `Blog related to programming, hacking & software development`,
+    siteLanguage: `en`,
+    siteImage: `/banner.jpg`,
+    author: `Shubham`,
   },
   plugins: [
     {
@@ -26,11 +33,11 @@ module.exports = {
         externalLinks: [
           {
             name: `Twitter`,
-            url: `https://twitter.com/lekoarts_de`,
+            url: `https://twitter.com/@this_shubham_/`,
           },
           {
-            name: `Instagram`,
-            url: `https://www.instagram.com/lekoarts.de/`,
+            name: `Github`,
+            url: `https://www.github.com/ShubhamSingh20/`,
           },
         ],
       },
