@@ -8,11 +8,11 @@ module.exports = {
   siteMetadata: {
     siteTitle: `#define BUILD_FAILED_SUCCESSFULLY`,
     siteTitleAlt: `Build Failed Successfully`,
-    siteHeadline: `Minimal Blog - Gatsby Theme from @lekoarts`,
+    siteHeadline: `Software, Programming & other uber nerdy shit`,
     siteUrl: `http://build-failed-successfully.fail`,
     siteDescription: `Blog related to programming, hacking & software development`,
     siteLanguage: `en`,
-    siteImage: `/banner.jpg`,
+    siteImage: `/banner.png`,
     author: `Shubham`,
   },
   plugins: [
@@ -61,13 +61,8 @@ module.exports = {
         display: `standalone`,
         icons: [
           {
-            src: `/android-chrome-192x192.png`,
+            src: `/android-icon-192x192.png`,
             sizes: `192x192`,
-            type: `image/png`,
-          },
-          {
-            src: `/android-chrome-512x512.png`,
-            sizes: `512x512`,
             type: `image/png`,
           },
         ],
