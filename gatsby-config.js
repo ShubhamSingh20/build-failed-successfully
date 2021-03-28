@@ -6,7 +6,7 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitle: `#define BUILD_FAILED_SUCCESSFULLY`,
+    siteTitle: `#define BUILD_FAILED_SUCCESSFULLY 1`,
     siteTitleAlt: `Build Failed Successfully`,
     siteHeadline: `Software, Programming & other uber nerdy shit`,
     siteUrl: `http://build-failed-successfully.fail`,
