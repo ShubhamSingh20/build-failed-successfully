@@ -100,7 +100,7 @@ const CertificateTable = () => {
   return (
     <table style={tableStyle}>
       <tr>
-        <th style={tableCell}>Certificates 📝</th>
+        <th style={tableCell}>Certificates <span role="img" aria-label="certificates"> 📝 </span> </th>
         <th style={tableCell}>Description</th>
       </tr>
       {table.map((d, _) => (
@@ -120,7 +120,7 @@ const Skill = () => {
 
   return (
     <>
-      <p
+      <button
         style={{
           display: "inline",
           borderStyle: "dashed",
@@ -128,8 +128,8 @@ const Skill = () => {
         }}
         onClick={() => setShowSkill(!showSkill)}
       >
-        Click here to {showSkill ? "hide" : "see"} skills 🔨
-      </p>
+        {showSkill ? "Hide" : "Show my Skills 🔨"}
+      </button>
       <Flex
         style={{
           flexDirection: "column",
