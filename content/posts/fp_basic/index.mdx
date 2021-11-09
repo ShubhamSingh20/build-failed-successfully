@@ -1,0 +1,123 @@
+---
+title: Maps, Filter & Reduce - Writing cleaner code with Functional Programming
+date: 2021-11-08
+tags:
+  - Functional Programming
+  - Clean Code
+---
+In this short write up, I will try to introduce some very basic functional programming (fp) concepts which will help you in writing more cleaner, simple, readable and easy to maintain code.
+
+I am using python for this write up but the points that I am about to mention are language independent, these features will be available in most of the dynamic or static languages and if not they can be implemented from scratch as well.
+
+For examples I would write a piece of code in imperative style first and then write the fp alternative to it.
+
+### 1. Maps
+**template**: *map(f(x) -> x', Iterable) -> Iterable*
+
+Mapping is used whenever you have something that can be iterated  over and we want a one to one mapping for that iterate. Meaning for every element in that iterable we would like to get a new element. 
+
+```python
+# make each integer element multiple of 10
+buff = []
+collection = [1,2,3,4]
+
+for num in collection:
+    buff.append(num*10)
+```
+I have seen above code or a template similar to that more times than I count. Basically we have a collection or list of data and we declare a new list in which we append elements after performing some operations from a initial iteratable object.
+
+Since, we need a new element for every existing element in the list we can simply use a map function.
+
+```python
+buff = list(map(lambda x: x*10, collection))
+```
+
+### 2. Filter
+**template**: *filter(f(x) -> bool, Iterable) -> Iterable*
+
+Again, we have a collection and we some conditional logic to determine which element should make into the final list.
+
+```python
+# Get All the strings with length more than 4
+collection = ["js", "python", "haskell", "erlang", "c++", "ruby"]
+buff = []
+
+for prog in collection:
+    if len(prog) > 4:
+        buff.append(prog)
+```
+
+Using filter it can be simply return as: 
+
+```python
+buff = list(filter(lambda prog: bool(len(prog) > 4), collection))
+```
+
+## 3. Reduce
+
+**template**: *reduce(f(accumulator, x) -> x', Iterable, initalState) -> accumulator*
+
+Reduce takes in 3 main arguments a collection or input iterable over which it can iterate, a function for reduction and an initial state for an accumulator, which is used to hold the result of the previous computations and in the end it return backs the accumulator.  
+
+```python
+# for a given string, uppercase all the vowel letters
+collection = "this is lower string"
+out = ""
+
+for c in collection:
+  if c in ['a', 'i', 'e', 'o', 'u']:
+    out += c.upper()
+  else:
+    out += c
+
+#output: "thIs Is lOwEr strIng"
+```
+
+Using reduce we can further boil down the imperative style
+
+```python
+from functools import reduce
+
+def vowelToUpper(acc : str, c: str):
+  if c in ['a', 'i', 'e', 'o', 'u']:
+    return acc + c.upper()
+  return acc + c
+
+# initialState for accumulator is an empty string ("")
+out = reduce(vowelToUpper, collection, "")
+
+#output: "thIs Is lOwEr strIng"
+```
+### Note
+
+Try to use the above specified functions alongside each other for writing more readable code.
+
+Let's take an example: 
+
+```python
+# Let's say we have a class N (node), consiting of type & amount
+# And we need to return sum of all the nodes of given type "X"
+
+from functools import reduce
+
+class N:
+    def __init__(self, e, amount) -> None:
+        self.e_type = e
+        self.amount = amount
+
+# here we have a collection of nodes consisting of 
+# type which can be 'A', 'B' or 'C'
+col = [N('A', 20), N('B', 10), N('B', 70), N('C', 72), N('A', 29)]
+
+def get_type_count(node_type: str, collection : list):
+	# pass the output of filter as input to reduce
+	# we can pass filter directly as well directly as well.
+    filtered_collection = filter(lambda x: x.e_type == node_type, col)
+    return reduce(lambda acc, x: acc + x.amount, filtered_collection, 0)
+
+final = get_type_count('A', col)
+print(final)
+
+#output
+# 42
+```
