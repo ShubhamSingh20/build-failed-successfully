@@ -1,0 +1,111 @@
+---
+title: "TIL #0 - How to get index scan on timestamp column with a predicate?"
+date: 2022-01-10T13:13:37+05:30
+showDate: true
+draft: false
+tags: ["TIL","postgres", "SQL"]
+---
+### Problem 
+How to get index scan on indexed timestamp column in postgres alongside a predicate?
+
+### Solution
+Ensure usage of functions which are tagged as `STABLE` or `IMMUTATBLE` in query predicate and also explicitly specify the predicate in case of partial index
+
+### Case Study
+Consider the following table named `User`. (*Can directly jump to explanation section*)
+
+| User  |
+| --- |
+| + id (INT) |
+| + username (TEXT) |
+| + created_at (TIMESTAMPTZ) |
+
+At some point the table saw exponential growth in inserts so it was decided to index `created_at` column but since only data from frequent time series was required (let’s say last one month), it made sense to just partially index the table. Table was partially index using the following query
+
+```sql
+CREATE INDEX partial_idx_user_created_at_2021 ON public."User" USING BTREE ("created_at") WHERE (("created_at" >= '2021-01-01 00:00:00+00'::TIMESTAMPTZ))
+```
+
+Now, our motive is to get count of users created in past 1 month, let’s try query plan generated for different queries and try to get the best possible plan (probably a index scan in our case)
+
+### Attempt 1
+
+```sql
+EXPLAIN SELECT 
+	COUNT(id) 
+FROM 
+	"User" 
+WHERE
+	"created_at"::DATE BETWEEN 
+	(CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ - INTERVAL '1 MONTH' AND
+  (CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ;
+
+-- output
+Finalize Aggregate  (cost=8213439.22..8213439.23 rows=1 width=8)
+  ->  Gather  (cost=8213439.01..8213439.22 rows=2 width=8)
+	Workers Planned: 2
+	->  Partial Aggregate  (cost=8212439.01..8212439.02 rows=1 width=8)
+		->  Parallel Seq Scan on "User"  (cost=0.00..8210763.50 rows=670203 width=4)
+				Filter: ((("created_at")::date <= ((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone) AND
+					(("created_at")::date >= (((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone - '1 mon'::interval)))
+```
+
+we are getting a sequential scan makes sense, postgres will go through the entire table and pluck out the rows where the column satisfy the condition. 
+
+We need to force it to utilize the `partial_idx_user_created_at_2021` partial index collection, we will do so by explicitly specifying the predicate from the partial index in the query, and check the query generated.
+
+### Attempt 2
+
+```sql
+EXPLAIN SELECT 
+	COUNT(id) 
+FROM 
+	"User" 
+WHERE
+	"created_at" >= '2021-01-01 00:00:00+00'::TIMESTAMPTZ -- PREDICATE FROM PARTIAL INDEX
+	AND 
+		"created_at"::DATE BETWEEN (CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ - INTERVAL '1 MONTH' AND
+	  (CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ;
+
+-- output
+Finalize Aggregate  (cost=8547479.33..8547479.34 rows=1 width=8)
+->  Gather  (cost=8547479.12..8547479.32 rows=2 width=8)
+	Workers Planned: 2
+	->  Partial Aggregate  (cost=8546479.12..8546479.12 rows=1 width=8)
+		->  Parallel Seq Scan on "User"  (cost=0.00..8545865.00 rows=245646 width=4)
+				Filter: (("createdAt" >= '2021-01-01 00:00:00+00'::timestamp with time zone) AND 
+				(("created_at")::date <= ((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone) AND 
+				(("created_at")::date >= (((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone - '1 mon'::interval)))
+
+```
+
+Still getting sequential scan? We specified the predicate from partial index, and that definitely made into the query planner but it’s still giving us sequential scan! After pondering and googling about it a bit, I came across the following doc [https://www.postgresql.org/docs/8.3/xfunc-volatility.html](https://www.postgresql.org/docs/8.3/xfunc-volatility.html) , let’s make a small tweak in the query and try again.
+
+### Final Attempt
+
+```sql
+EXPLAIN SELECT 
+	COUNT(id) 
+FROM 
+	"User" 
+WHERE
+	"created_at"::TIMESTAMPTZ >= '2021-01-01 00:00:00+00'::TIMESTAMPTZ -- casting to timestampz(actual type)
+	AND 
+		"created_at"::DATE BETWEEN (CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ - INTERVAL '1 MONTH' AND
+	  (CURRENT_DATE + INTERVAL '0 HOURS')::TIMESTAMPTZ;
+
+-- output
+Aggregate  (cost=8.61..8.62 rows=1 width=8)
+->  Index Scan using partial_idx_user_created_at_2021 on "User"  (cost=0.58..8.61 rows=1 width=4)
+  	Index Cond: (("created_at" >= (((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone - '1 mon'::interval)) AND ("created_at" <= ((CURRENT_DATE + '00:00:00'::interval))::timestamp with time zone))
+```
+
+And, finally we get a index scan with predicate condition. So what changed? We see the planner no longer mentions the predicate from `partial_idx_user_created_at_2021` instead it just uses that partial index. Meaning it decided it was safe to use. Well our mistake was(I have made similar mistake in prod and hence writing this blog), casting `created_at` to `DATE` doing so was an example of a `VOLATILE` function, and whenever such a function is used in a query planner as a conservative approach postgres doesn’t refer to the index.
+
+### Explanation
+
+*An index can be used, when the indexed column(s) is/are compared to constants (literal values), function calls, which are marked at least `STABLE` (which means that within a single statement, multiple calls of the functions, with same parameters, will produce the same results), or/and `IMMUATABLE` (function cannot modify the database and is guaranteed to return the same results given the same arguments forever) or combination of those.*
+
+In our case study, partial index was on `created_at` of type `TIMESTAMP WITH TIMEZONE`
+
+casting `created_at` to date was an example of potentially `VOLATILE` function since their is a possible case for the server's timezone to change (timezone offset specified from column) hence yielding inconsistent results.
