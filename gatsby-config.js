@@ -13,7 +13,7 @@ module.exports = {
     siteDescription: `Blog related to programming, hacking & software development`,
     siteLanguage: `en`,
     siteImage: `/banner.png`,
-    author: `Shubham`,
+    author: `Shubham Singh`,
   },
   plugins: [
     {
@@ -52,12 +52,12 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `minimal-blog - @lekoarts/gatsby-theme-minimal-blog`,
-        short_name: `minimal-blog`,
-        description: `Typography driven, feature-rich blogging theme with minimal aesthetics. Includes tags/categories support and extensive features for code blocks such as live preview, line numbers, and code highlighting.`,
+        name: `Build Failed Successfully - Shubham Singh`,
+        short_name: `Build Failed Successfully`,
+        description: `Blog related to programming, hacking & software development`,
         start_url: `/`,
         background_color: `#fff`,
-        theme_color: `#6B46C1`,
+        theme_color: `#2d3748`,
         display: `standalone`,
         icons: [
           {
