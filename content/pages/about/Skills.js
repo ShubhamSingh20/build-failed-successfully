@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Flex, Box } from "theme-ui";
 
 const tableStyle = {
@@ -123,6 +123,11 @@ const RESUME_LINK = "https://drive.google.com/file/d/1-30-lQQDTlTlg4RYLaxor-BToS
 const Skill = () => {
   const [showSkill, setShowSkill] = useState(false);
 
+  useEffect(() => {
+    if(!!window){
+      window.location.hash === '#resume' && setShowSkill(true)
+    }
+  },[])
   return (
     <>
       <button
@@ -142,8 +147,8 @@ const Skill = () => {
           justifyContent: "space-between",
         }}
       >
-        <div data="myfile.pdf" type="application/pdf" width="100%" height="100%">
-          <p>You can find my <a href={RESUME_LINK} target="_blank">Resume Here</a></p>
+        <div id="resume">
+          <p>You can find my <a href={RESUME_LINK} target="_blank">Resume Here</a> 💻</p>
         </div>
         {showSkill && (
           <>
