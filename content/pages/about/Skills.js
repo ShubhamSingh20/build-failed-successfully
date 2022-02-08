@@ -23,6 +23,7 @@ const SkillTable = () => {
         "Redis",
         "Php",
         "PostgreSql",
+        "Ruby",
       ],
     },
     {
@@ -34,6 +35,7 @@ const SkillTable = () => {
         "Redux, Saga js",
         "Laravel",
         "React",
+        "Ruby on Rails"
       ],
     },
     {
@@ -45,6 +47,7 @@ const SkillTable = () => {
         "Lambda functions",
         "GCP",
         "AWS S3 & ecs",
+        "Firebase"
       ],
     },
   ];
@@ -106,7 +109,7 @@ const CertificateTable = () => {
       {table.map((d, _) => (
         <tr>
           <td style={tableCell}>
-            <a href={d.link} style={{':visited': {color: 'pink'}}}> {d.name} </a>
+            <a href={d.link} style={{ ':visited': { color: 'pink' } }}> {d.name} </a>
           </td>
           <td style={tableCell}>{d.description}</td>
         </tr>
@@ -114,6 +117,8 @@ const CertificateTable = () => {
     </table>
   );
 };
+
+const RESUME_LINK = "https://drive.google.com/file/d/1-30-lQQDTlTlg4RYLaxor-BToSGZ2gag/view?usp=sharing"
 
 const Skill = () => {
   const [showSkill, setShowSkill] = useState(false);
@@ -137,9 +142,12 @@ const Skill = () => {
           justifyContent: "space-between",
         }}
       >
+        <div data="myfile.pdf" type="application/pdf" width="100%" height="100%">
+          <p>You can find my <a href={RESUME_LINK} target="_blank">Resume Here</a></p>
+        </div>
         {showSkill && (
           <>
-            <Box p={2} sx={{ flex: '1 1 auto', justifyContent: 'space-between', marginBottom: '2rem'}}>
+            <Box p={2} sx={{ flex: '1 1 auto', justifyContent: 'space-between', marginBottom: '2rem' }}>
               <SkillTable />
             </Box>
             <Box>
