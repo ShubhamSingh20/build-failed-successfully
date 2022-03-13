@@ -9,7 +9,7 @@ module.exports = {
     siteTitle: `#define BUILD_FAILED_SUCCESSFULLY -1`,
     siteTitleAlt: `Build Failed Successfully`,
     siteHeadline: `Software, Programming & stuff`,
-    siteUrl: `http://build-failed-successfully.fail`,
+    siteUrl: `http://build-failed-successfully.com`,
     siteDescription: `Blog related to programming, hacking & software development`,
     siteLanguage: `en`,
     siteImage: `/banner.png`,
@@ -22,13 +22,17 @@ module.exports = {
       options: {
         navigation: [
           {
+            title: `About`,
+            slug: `/about`,
+          },
+          {
             title: `Blog`,
             slug: `/blog`,
           },
           {
-            title: `About`,
-            slug: `/about`,
-          },
+            title: `Projects`,
+            slug: `/tags/project`
+          }
         ],
         externalLinks: [
           {
