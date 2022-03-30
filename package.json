@@ -7,7 +7,7 @@
   "license": "0BSD",
   "starter-name": "gatsby-starter-minimal-blog",
   "engines": {
-    "node": "14.15.0"
+    "node": "14.15.5"
   },
   "scripts": {
     "build": "gatsby build",
